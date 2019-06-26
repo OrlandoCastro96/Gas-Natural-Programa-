@@ -256,34 +256,56 @@
         '    MsgBox(KiW(j), MsgBoxStyle.SystemModal, "W")
         'Next
     End Sub
-    Public Sub CalcPlatosReflujo(ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown, ByVal num1 As NumericUpDown, ByVal num2 As NumericUpDown, ByVal num3 As NumericUpDown, ByVal num4 As NumericUpDown, ByVal num5 As NumericUpDown, ByVal num6 As NumericUpDown, ByVal num7 As NumericUpDown)
+    Public Sub CalcPlatosReflujo(ByVal numD1 As NumericUpDown, ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown, ByVal num1 As NumericUpDown, ByVal num2 As NumericUpDown, ByVal num3 As NumericUpDown, ByVal num4 As NumericUpDown, ByVal num5 As NumericUpDown, ByVal num6 As NumericUpDown, ByVal num7 As NumericUpDown)
         Dim Sm As Double = 0
         Dim Beta As Double = 0, bdata As Double = 0
-        Dim theta As Double = 0, sum As Double = 0, i As Integer = 0
+        Dim theta As Double = 0, sum As Double = 0, sumD As Double = 0, i As Integer = 0
+        Dim Iteraciones As UInteger = 0, es As Double = 0.0001, ea As Double = 0
+        Dim LV As Double = 0, LVm As Double = 0, Sm_S As Double = 0
         Dim CompF = New Double() {num1.Value / 100, num2.Value / 100, num3.Value / 100, num4.Value / 100, num5.Value / 100, num6.Value / 100, num7.Value / 100}
+        Dim CompD = New Double() {numD1.Value / 100, numD2.Value / 100, numD3.Value / 100}
         Dim AlfaF = New Double() {68.33, 26.67, 13.83, 11.0, 5.83, 5.0, 1.0}
+        ' VALOR INICIAL <----
+        Dim theta_i As Double = 0.0 'Valor inicial de la NR
         'Calculo de beta y bdata // Condenser y reboiler
-        bdata = (Math.Log(KiWC3 / KiDC3)) / (Math.Log(KiWC4 / KiDC4))
-        Beta = KiDC3 / Math.Pow(KiDC4, bdata)
-
+        'bdata = Math.Abs((Math.Log(KiWC3 / KiDC3)) / (Math.Log(KiWC4 / KiDC4)))
+        'Beta = Math.Abs(KiDC3 / Math.Pow(KiDC4, bdata))
+        bdata = 0.798
+        Beta = 1.759
         'Calculo de Sm
         Sm = Math.Log10((numD2.Value / numW1.Value) * Math.Pow(numW2.Value / numD3.Value, bdata) * Math.Pow(W / D, bdata - 1)) / Math.Log10(Beta)
 
-        'Calculo del reflujo minimo
-
+        'Calculo del reflujo minimo // NR
+        theta_i = InputBox("Introduzca el valor inicial de Theta (Use coma decimal!)")
         Do While (True)
             sum = 0
+            sumD = 1
             For i = 0 To 6
-                sum += (CompF(i) * AlfaF(i)) / (AlfaF(i) - theta)
+                sum += (CompF(i) * AlfaF(i)) / (AlfaF(i) - theta_i)
+                sumD += (CompF(i) * AlfaF(i)) / Math.Pow(AlfaF(i) - theta_i, 2)
             Next
-            If (sum > -0.001 And sum < 0.001) Then
-                Exit Do
-            Else
-                theta += 0.1
-                'MsgBox(theta)
-            End If
+            theta = theta_i - (sum) / (sumD)
+            ea = Math.Abs(theta - theta_i) * 100
+            If (ea < es Or Iteraciones > 40) Then Exit Do
+            Iteraciones += 1
+            theta_i = theta
         Loop
-        MsgBox(theta)
+        If Iteraciones > 40 Then
+            MsgBox("Solucion no hallada")
+            Exit Sub
+        End If
+        'Para el Destilado
+        sumD = 0
+        For i = 0 To 2
+            sumD += (CompD(i) * AlfaF(i)) / (AlfaF(i) - theta)
+        Next
+        ReflujoMinimo = sumD - 1
+
+        'Calculo del numero minimo de platos
+        LV = (1.3 * ReflujoMinimo) / (1.3 * ReflujoMinimo + 1)
+        LVm = (ReflujoMinimo) / (ReflujoMinimo + 1)
+        Sm_S = InputBox("En la figura 19-7 GPSA con:" & vbCrLf & "L0/V1 = " & LV & vbCrLf & "(L0/V1)m = " & LVm & vbCrLf & "Halle Sm/S: " & Sm)
+        PlatosMinimo = Sm / Sm_S
         'MsgBox("Ingresar el numero con coma: ,")
     End Sub
 End Class
