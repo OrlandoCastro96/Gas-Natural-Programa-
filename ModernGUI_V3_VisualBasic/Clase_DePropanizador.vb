@@ -256,15 +256,34 @@
         '    MsgBox(KiW(j), MsgBoxStyle.SystemModal, "W")
         'Next
     End Sub
-    Public Sub CalcPlatosReflujo(ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown)
-        Dim Sf As Double = 0, Sm As Double = 0
+    Public Sub CalcPlatosReflujo(ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown, ByVal num1 As NumericUpDown, ByVal num2 As NumericUpDown, ByVal num3 As NumericUpDown, ByVal num4 As NumericUpDown, ByVal num5 As NumericUpDown, ByVal num6 As NumericUpDown, ByVal num7 As NumericUpDown)
+        Dim Sm As Double = 0
         Dim Beta As Double = 0, bdata As Double = 0
-        'Calculo de Sm
-        Sf = (numD2.Value / numW1.Value) * (numW2.Value / numD3.Value)
-        Sm = Math.Log10(Sf) / Math.Log10(_alfaAVG)
+        Dim theta As Double = 0, sum As Double = 0, i As Integer = 0
+        Dim CompF = New Double() {num1.Value / 100, num2.Value / 100, num3.Value / 100, num4.Value / 100, num5.Value / 100, num6.Value / 100, num7.Value / 100}
+        Dim AlfaF = New Double() {68.33, 26.67, 13.83, 11.0, 5.83, 5.0, 1.0}
         'Calculo de beta y bdata // Condenser y reboiler
+        bdata = (Math.Log(KiWC3 / KiDC3)) / (Math.Log(KiWC4 / KiDC4))
+        Beta = KiDC3 / Math.Pow(KiDC4, bdata)
 
+        'Calculo de Sm
+        Sm = Math.Log10((numD2.Value / numW1.Value) * Math.Pow(numW2.Value / numD3.Value, bdata) * Math.Pow(W / D, bdata - 1)) / Math.Log10(Beta)
 
+        'Calculo del reflujo minimo
+
+        Do While (True)
+            sum = 0
+            For i = 0 To 6
+                sum += (CompF(i) * AlfaF(i)) / (AlfaF(i) - theta)
+            Next
+            If (sum > -0.001 And sum < 0.001) Then
+                Exit Do
+            Else
+                theta += 0.1
+                'MsgBox(theta)
+            End If
+        Loop
+        MsgBox(theta)
         'MsgBox("Ingresar el numero con coma: ,")
     End Sub
 End Class

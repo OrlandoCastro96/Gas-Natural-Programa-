@@ -56,7 +56,7 @@
         End If
         obj.TempCond = TxtTemperaturaCond.Text
         obj.CalculoK(NumD1, NumD2, NumD3, NumW1, NumW2, NumW3, NumW4, NumW5, NumW6)
-        obj.CalcPlatosReflujo()
+        obj.CalcPlatosReflujo(NumD2, NumD3, NumW1, NumW2, Num1, Num2, Num3, Num4, Num5, Num6, Num7)
         'Catch ex As Exception
         '    MsgBox("Los datos no convergen.")
         'End Try
