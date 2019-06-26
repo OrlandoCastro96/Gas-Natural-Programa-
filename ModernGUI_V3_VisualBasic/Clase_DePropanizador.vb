@@ -29,6 +29,36 @@
         End Set
     End Property
 
+    Private _TempW As Double
+    Public Property TempW() As Double
+        Get
+            Return _TempW
+        End Get
+        Set(ByVal value As Double)
+            _TempW = value
+        End Set
+    End Property
+
+    Private _Presion As Double
+    Public Property Presion() As Double
+        Get
+            Return _Presion
+        End Get
+        Set(ByVal value As Double)
+            _Presion = value
+        End Set
+    End Property
+
+    Private _alfaAVG As Double
+    Public Property AlfaAVG() As Double
+        Get
+            Return _alfaAVG
+        End Get
+        Set(ByVal value As Double)
+            _alfaAVG = value
+        End Set
+    End Property
+
     Public Sub BalanceMateria(ByVal num1 As NumericUpDown, ByVal num2 As NumericUpDown, ByVal num3 As NumericUpDown, ByVal num4 As NumericUpDown, ByVal num5 As NumericUpDown, ByVal num6 As NumericUpDown, ByVal num7 As NumericUpDown, ByVal numPropano As NumericUpDown, ByVal numButano As NumericUpDown, ByVal numD1 As NumericUpDown, ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown, ByVal numW3 As NumericUpDown, ByVal numW4 As NumericUpDown, ByVal numW5 As NumericUpDown, ByVal numW6 As NumericUpDown)
         _D = 0
         _W = 0
@@ -84,52 +114,48 @@
         Dim Tbi() As Integer = {303, 416, 471, 491, 542, 557, 610}
 #End Region
         ' Declaracion de variables
-        Dim i As UInteger = 0, j As UInteger = 0, k As UInteger
-        Dim Pres As Double = 0
-        Dim TempW As Double = _Temp
+        Dim i As UInteger = 0, j As UInteger = 0, k As UInteger = 0
+        Dim _alfaD As Double = 0, _alfaW As Double = 0
         Dim a As Double = 0, c As Double = 0
         Dim sumPresBurbuj As Double = 0, sumTempBurbuj As Double = 0
+        'Valores iniciales de las incognitas (Modificar si es necesario)
+        _Presion = 280.0
+        _TempW = 710.0
         ' Destilado
         Dim KiD(2) As Double
         Dim FiD(2) As Double
-        'Dim FiD = New Double() {C2bi * (1 / C2Tbi + 1 / Temp), C3bi * (1 / C3Tbi + 1 / Temp), iC4bi * (1 / iC4Tbi + 1 / Temp)}
         Dim CompD = New Double() {numD1.Value / 100, numD2.Value / 100, numD3.Value / 100}
         'Colas
         Dim KiW(5) As Double
         Dim FiW(5) As Double
-        Dim CompW = New Double() {numW1.Value / 100, numW2.Value / 100, numW3.Value / 100, numW4.Value / 100, numW4.Value / 100, numW5.Value / 100, numW6.Value / 100}
-
+        Dim CompW = New Double() {numW1.Value / 100, numW2.Value / 100, numW3.Value / 100, numW4.Value / 100, numW5.Value / 100, numW6.Value / 100}
         'Calculo en "D"/ Presion de burbuja
-        Pres = 250.0
         For k = 0 To 2
             FiD(k) = bi(k) * (1 / Tbi(k) + 1 / _Temp)
         Next
         Do While (True)
             sumPresBurbuj = 0
-            a = 1.2 + 0.0045 * Pres + 0.00000015 * Math.Pow(Pres, 2)
-            c = 0.89 - 0.00017 * Pres - 0.000000035 * Math.Pow(Pres, 2)
+            a = 1.2 + 0.0045 * _Presion + 0.00000015 * Math.Pow(_Presion, 2)
+            c = 0.89 - 0.00017 * _Presion - 0.000000035 * Math.Pow(_Presion, 2)
             For i = 0 To 2
-                KiD(i) = Math.Pow(10, a + c * FiD(i)) / Pres
+                KiD(i) = Math.Pow(10.0, a + c * FiD(i)) / (_Presion)
             Next
             For j = 0 To 2
-                sumPresBurbuj = sumPresBurbuj + CompD(j) * KiD(j)
-                MsgBox(" sumPres00: " & sumPresBurbuj & " " & j)
-                'Problema sumPres = 0
+                sumPresBurbuj += CompD(j) * KiD(j)
             Next
-            MsgBox(" sumPres00: " & sumPresBurbuj & " " & Pres)
-            If (sumPresBurbuj > 0.99 And sumPresBurbuj < 1.01) Then
+            If (sumPresBurbuj > 0.999999 And sumPresBurbuj < 1.000001) Then
                 'Salir
-                MsgBox(" sumPres: " & sumPresBurbuj)
                 Exit Do
-            ElseIf sumPresBurbuj >= 1.01 Then
-                Pres *= 1.1
-            ElseIf sumPresBurbuj <= 0.99 Then
-                Pres *= 0.9
+            ElseIf (sumPresBurbuj >= 1.000001) Then
+                _Presion *= 0.9
+            ElseIf (sumPresBurbuj <= 0.999999 And sumPresBurbuj > 0) Then
+                _Presion *= 1.1
             Else
-                MsgBox("Caso no definido")
+                MsgBox("Caso no definido" & vbCrLf & sumPresBurbuj & vbCrLf & _Presion & " psia.", MsgBoxStyle.Information, "PRESION")
+                Exit Sub
             End If
         Loop
-
+        MsgBox("PRESION DE BURBUJA HALLADA!" & vbCrLf & sumPresBurbuj & vbCrLf & _Presion & " psia.", MsgBoxStyle.Information, "CONVERGE")
         ' Calculo en "W" / Temperatura de Burbuja
         Do While (True)
             sumTempBurbuj = 0
@@ -137,26 +163,35 @@
                 FiW(i) = bi(i + 1) * (1 / Tbi(i + 1) + 1 / TempW)
             Next
             For j = 0 To 5
-                KiW(j) = Math.Pow(10, a + c * FiW(j)) / Pres
+                KiW(j) = Math.Pow(10.0, a + c * FiW(j)) / (_Presion)
             Next
             For k = 0 To 5
                 sumTempBurbuj += CompW(k) * KiW(k)
             Next
-            If (sumTempBurbuj > 0.99 And sumTempBurbuj < 1.01) Then
+            If (sumTempBurbuj > 0.999999 And sumTempBurbuj < 1.000001) Then
                 'Salir
-                MsgBox("TempW. " & TempW & vbCrLf & sumTempBurbuj)
                 Exit Do
-            ElseIf (sumTempBurbuj >= 1.01) Then
+            ElseIf (sumTempBurbuj >= 1.000001) Then
                 TempW *= 1.1
-                MsgBox("TempW. " & TempW & vbCrLf & sumTempBurbuj)
-            ElseIf (sumTempBurbuj <= 0.99) Then
+            ElseIf (sumTempBurbuj <= 0.999999 And sumTempBurbuj > 0) Then
                 TempW *= 0.9
-                MsgBox("TempW. " & TempW & vbCrLf & sumTempBurbuj)
             Else
-                MsgBox("Caso no definido")
+                MsgBox("Caso no definido" & vbCrLf & sumTempBurbuj & vbCrLf & TempW - 460 & " °F", MsgBoxStyle.Information, "TEMPERATURA")
                 Exit Sub
             End If
         Loop
-        MsgBox("Metodo terminado!")
+        MsgBox("TEMPERATURA DE BURBUJA HALLADA!" & vbCrLf & sumTempBurbuj & vbCrLf & TempW - 460 & " °F", MsgBoxStyle.Information, "CONNVERGE")
+        _alfaD = KiD(1) / KiD(2)
+        _alfaW = KiW(0) / KiW(1)
+        _alfaAVG = (_alfaD + _alfaW) / 2
+        'For i = 0 To 2
+        '    MsgBox(KiD(i), MsgBoxStyle.SystemModal, "D")
+        'Next
+        'For j = 0 To 5
+        '    MsgBox(KiW(j), MsgBoxStyle.SystemModal, "W")
+        'Next
+    End Sub
+    Public Sub CalcPlatosReflujo()
+
     End Sub
 End Class

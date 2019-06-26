@@ -49,13 +49,13 @@
     End Sub
 
     Private Sub BtnCalcular_Click(sender As Object, e As EventArgs) Handles BtnCalcular.Click
+        'Try
         If NumD1.Value = 0 Or NumW1.Value = 0 Then
             MsgBox("Realice el balance de materia")
             Exit Sub
         End If
         obj.TempCond = TxtTemperaturaCond.Text
         obj.CalculoK(NumD1, NumD2, NumD3, NumW1, NumW2, NumW3, NumW4, NumW5, NumW6)
-        'Try
 
         'Catch ex As Exception
         '    MsgBox("Los datos no convergen.")
