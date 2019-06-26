@@ -59,6 +59,65 @@
         End Set
     End Property
 
+    Private _PlatosMinimo As Double
+    Public Property PlatosMinimo() As Double
+        Get
+            Return _PlatosMinimo
+        End Get
+        Set(ByVal value As Double)
+            _PlatosMinimo = value
+        End Set
+    End Property
+
+    Private _ReflujoMinimo As Double
+    Public Property ReflujoMinimo() As Double
+        Get
+            Return _ReflujoMinimo
+        End Get
+        Set(ByVal value As Double)
+            _ReflujoMinimo = value
+        End Set
+    End Property
+
+    Private _KiDC3 As Double
+    Public Property KiDC3() As Double
+        Get
+            Return _KiDC3
+        End Get
+        Set(ByVal value As Double)
+            _KiDC3 = value
+        End Set
+    End Property
+
+    Private _KiDC4 As Double
+    Public Property KiDC4() As Double
+        Get
+            Return _KiDC4
+        End Get
+        Set(ByVal value As Double)
+            _KiDC4 = value
+        End Set
+    End Property
+
+    Private _KiWC3 As Double
+    Public Property KiWC3() As Double
+        Get
+            Return _KiWC3
+        End Get
+        Set(ByVal value As Double)
+            _KiWC3 = value
+        End Set
+    End Property
+
+    Private _KiWC4 As Double
+    Public Property KiWC4() As Double
+        Get
+            Return _KiWC4
+        End Get
+        Set(ByVal value As Double)
+            _KiWC4 = value
+        End Set
+    End Property
     Public Sub BalanceMateria(ByVal num1 As NumericUpDown, ByVal num2 As NumericUpDown, ByVal num3 As NumericUpDown, ByVal num4 As NumericUpDown, ByVal num5 As NumericUpDown, ByVal num6 As NumericUpDown, ByVal num7 As NumericUpDown, ByVal numPropano As NumericUpDown, ByVal numButano As NumericUpDown, ByVal numD1 As NumericUpDown, ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown, ByVal numW3 As NumericUpDown, ByVal numW4 As NumericUpDown, ByVal numW5 As NumericUpDown, ByVal numW6 As NumericUpDown)
         _D = 0
         _W = 0
@@ -181,9 +240,15 @@
             End If
         Loop
         MsgBox("TEMPERATURA DE BURBUJA HALLADA!" & vbCrLf & sumTempBurbuj & vbCrLf & TempW - 460 & " °F", MsgBoxStyle.Information, "CONNVERGE")
+        'Valores alfa
         _alfaD = KiD(1) / KiD(2)
         _alfaW = KiW(0) / KiW(1)
         _alfaAVG = (_alfaD + _alfaW) / 2
+        'Valores K necesarios
+        _KiDC3 = KiD(1)
+        _KiDC4 = KiD(2)
+        _KiWC3 = KiW(0)
+        _KiWC4 = KiW(1)
         'For i = 0 To 2
         '    MsgBox(KiD(i), MsgBoxStyle.SystemModal, "D")
         'Next
@@ -191,7 +256,15 @@
         '    MsgBox(KiW(j), MsgBoxStyle.SystemModal, "W")
         'Next
     End Sub
-    Public Sub CalcPlatosReflujo()
+    Public Sub CalcPlatosReflujo(ByVal numD2 As NumericUpDown, ByVal numD3 As NumericUpDown, ByVal numW1 As NumericUpDown, ByVal numW2 As NumericUpDown)
+        Dim Sf As Double = 0, Sm As Double = 0
+        Dim Beta As Double = 0, bdata As Double = 0
+        'Calculo de Sm
+        Sf = (numD2.Value / numW1.Value) * (numW2.Value / numD3.Value)
+        Sm = Math.Log10(Sf) / Math.Log10(_alfaAVG)
+        'Calculo de beta y bdata // Condenser y reboiler
 
+
+        'MsgBox("Ingresar el numero con coma: ,")
     End Sub
 End Class
